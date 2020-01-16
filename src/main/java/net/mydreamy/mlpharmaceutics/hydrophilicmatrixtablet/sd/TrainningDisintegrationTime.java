@@ -34,6 +34,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.linalg.activations.Activation;
 //import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -41,6 +42,7 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
+import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.nd4j.linalg.ops.transforms.Transforms;
 import org.slf4j.Logger;
@@ -64,11 +66,12 @@ public class TrainningDisintegrationTime {
     public static final int iterations = 1;
     
     //Number of epochs (full passes of the data)
-    public static final int nEpochs = 200;
+    public static final int nEpochs = 10000;
 
     //Batch size: i.e., each epoch has nSamples/batchSize parameter updates
     public static final int trainsetSize = 541;
     public static final int testsetsize = 136;
+    public static final int batchSize = 64;
     
     //Network learning rate
     public static final double learningRate = 0.01;
@@ -76,7 +79,7 @@ public class TrainningDisintegrationTime {
     //with api properties
     public static final int numInputs = 33; //from 0
     public static final int numOutputs = 7;
-public static final int numHiddenNodes = 150;
+    public static final int numHiddenNodes = 20;
 //     public static final int numHiddenNodes = 60;
 
     
@@ -103,7 +106,7 @@ public static final int numHiddenNodes = 150;
 			e.printStackTrace();
 		}
 
-        DataSetIterator iteratortrain = new RecordReaderDataSetIterator(recordReadertrain,trainsetSize,numInputs,numInputs+numOutputs-1,true);
+        DataSetIterator iteratortrain = new RecordReaderDataSetIterator(recordReadertrain,batchSize,numInputs,numInputs+numOutputs-1,true);
    
 
         
@@ -121,95 +124,95 @@ public static final int numHiddenNodes = 150;
 			e.printStackTrace();
 		}
 
-        DataSetIterator iteratortest = new RecordReaderDataSetIterator(recordReadertest,testsetsize,numInputs,numInputs+numOutputs-1,true);
+        DataSetIterator iteratortest = new RecordReaderDataSetIterator(recordReadertest,batchSize,numInputs,numInputs+numOutputs-1,true);
 
- //       log.info("testData set:" + testData.toString());
-        
-//        // Normalization
-//        NormalizerMinMaxScaler normalizer = new NormalizerMinMaxScaler();
-   
-        DataSet trainningData = iteratortrain.next();
-        DataSet testData = iteratortest.next();
-
-        
-//        log.info(testData.get(0).toString());
-        
- //       log.info(trainningData.toString());
- //       log.info(testData.toString());
-        
-//        normalizer.fitLabel(false);
-//        normalizer.fit(trainningData); 
-//        normalizer.transform(trainningData); 
-//        normalizer.transform(testData); 
+// //       log.info("testData set:" + testData.toString());
 //        
-        iteratortrain.reset();
-        iteratortest.reset();
+////        // Normalization
+////        NormalizerMinMaxScaler normalizer = new NormalizerMinMaxScaler();
+//   
+//        DataSet trainningData = iteratortrain.next();
+//        DataSet testData = iteratortest.next();
+//
 //        
-//       log.info(trainningData.toString());
-//        log.info(testData.toString());
-//        log.info("training data features:\n" + trainningData.getFeatureMatrix().toString());
-//        log.info("training data label:\n" + trainningData.getLabels().toString());
-//        normalizer.transform(testData); 
-//        log.info("training data features:\n" + testData.getFeatureMatrix().toString());
-//        log.info("training data label:\n" + testData.getLabels().toString());
+////        log.info(testData.get(0).toString());
+//        
+// //       log.info(trainningData.toString());
+// //       log.info(testData.toString());
+//        
+////        normalizer.fitLabel(false);
+////        normalizer.fit(trainningData); 
+////        normalizer.transform(trainningData); 
+////        normalizer.transform(testData); 
+////        
+//        iteratortrain.reset();
+//        iteratortest.reset();
+////        
+////       log.info(trainningData.toString());
+////        log.info(testData.toString());
+////        log.info("training data features:\n" + trainningData.getFeatureMatrix().toString());
+////        log.info("training data label:\n" + trainningData.getLabels().toString());
+////        normalizer.transform(testData); 
+////        log.info("training data features:\n" + testData.getFeatureMatrix().toString());
+////        log.info("training data label:\n" + testData.getLabels().toString());
         
         // Network Configuration
         MultiLayerNetwork net = new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
                 .seed(seed)
-                .iterations(iterations)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-                .learningRate(learningRate)
+//                .learningRateDecayPolicy(LearningRatePolicy.Exponential)
+//                .lrPolicyDecayRate(0.01)
                 .weightInit(WeightInit.RELU)
-                .regularization(true)
-                .l2(1e-3)
+//                .regularization(true)
+//                .l2(2e-3)
                 .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
-              //  .dropOut(0.5)
-                .updater(Updater.NESTEROVS).momentum(0.9)
-              //  .updater(Updater.ADAM)
+//                .dropOut(0.8)
+//                .updater(Updater.NESTEROVS).momentum(0.9)
+                .updater(new Adam(learningRate))
                 .list()
-                .layer(0, new DenseLayer.Builder().nIn(numInputs).nOut(numHiddenNodes)
-                        .activation("tanh")
+                .layer(0, new DenseLayer.Builder().nIn(numInputs).nOut(numHiddenNodes*10)
+                        .activation(Activation.TANH)
+                        .build())             
+                .layer(1, new DenseLayer.Builder().nOut(numHiddenNodes*8)
+                        .activation(Activation.TANH).dropOut(0.5)
                         .build())
-                .layer(1, new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes)
-                        .activation("tanh")
+                .layer(2, new DenseLayer.Builder().nOut(numHiddenNodes*6)
+                        .activation(Activation.TANH).dropOut(0.6)
                         .build())
-                .layer(2, new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes)
-                        .activation("tanh")
+                .layer(3, new DenseLayer.Builder().nOut(numHiddenNodes*4)
+                        .activation(Activation.TANH).dropOut(0.7)
                         .build())
-                .layer(3, new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes)
-                        .activation("tanh")
+                .layer(4, new DenseLayer.Builder().nOut(numHiddenNodes*2)
+                        .activation(Activation.TANH).dropOut(0.8)
                         .build())
-                .layer(4, new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes)
-                        .activation("tanh")
+                .layer(5, new DenseLayer.Builder().nOut(numHiddenNodes)
+                        .activation(Activation.TANH).dropOut(0.9)
                         .build())
-                .layer(5, new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes)
-                        .activation("tanh")
+                .layer(6, new DenseLayer.Builder().nOut(numHiddenNodes*2)
+                        .activation(Activation.TANH)
                         .build())
-                .layer(6, new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes)
-                        .activation("tanh")
-                        .build())
-                .layer(7, new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes)
-                        .activation("tanh")
+                .layer(7, new DenseLayer.Builder().nOut(numHiddenNodes*2)
+                        .activation(Activation.TANH)
                         .build())
 //                .layer(8, new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes)
 //                        .activation("tanh")
 //                        .build())
                 .layer(8, new OutputLayer.Builder(LossFunctions.LossFunction.L2)
-                        .activation("sigmoid")
-                        .nIn(numHiddenNodes).nOut(numOutputs).build())
-                .pretrain(false).backprop(true).build()
+                        .activation(Activation.TANH.SIGMOID)
+                        .nOut(numOutputs).build())
+                .build()
         );
         net.init();
-        net.setListeners(new ScoreIterationListener(1000));
+        net.setListeners(new ScoreIterationListener(100));
         
         
         List<EpochTerminationCondition> terminationconditions = new LinkedList<EpochTerminationCondition>();
       //  terminationconditions.add(new ScoreImprovementEpochTerminationCondition(100, 1E-10));
-        terminationconditions.add(new BestScoreEpochTerminationCondition(0.01));
+//        terminationconditions.add(new BestScoreEpochTerminationCondition(0.01));
 //        terminationconditions.add(new MaxEpochsTerminationCondition(1100));
 //      terminationconditions.add(new MaxEpochsTerminationCondition(4000));
 
-        terminationconditions.add(new MaxEpochsTerminationCondition(70000));
+        terminationconditions.add(new MaxEpochsTerminationCondition(nEpochs));
 
         EarlyStoppingConfiguration<MultiLayerNetwork> esConf = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
         		.epochTerminationConditions(terminationconditions)
@@ -271,14 +274,17 @@ public static final int numHiddenNodes = 150;
  //       iteratortest.reset();
   //      DataSet testData = iteratortest.next();
         
-        log.info("========================== testing =========================");
-        log.info("========================== latest model =========================");
-        //test on latest model
-        testOnDiffModel(latestModel, trainningData, testData);
         
-        log.info("========================== best model =========================");
-        //test on best model
-        testOnDiffModel(bestModel, trainningData, testData);
+        
+        
+//        log.info("========================== testing =========================");
+//        log.info("========================== latest model =========================");
+//        //test on latest model
+//        testOnDiffModel(latestModel, trainningData, testData);
+//        
+//        log.info("========================== best model =========================");
+//        //test on best model
+//        testOnDiffModel(bestModel, trainningData, testData);
  
 	}
 
@@ -287,7 +293,7 @@ public static final int numHiddenNodes = 150;
 	       // evaluation training set
         RegressionEvaluation evalTrain = new RegressionEvaluation(numOutputs);
         
-        INDArray featuresTrain = trainningData.getFeatureMatrix();
+        INDArray featuresTrain = trainningData.getFeatures();
         INDArray lablesTrain = trainningData.getLabels();
         
         INDArray PredictionTrain = net.output(featuresTrain);
@@ -319,7 +325,7 @@ public static final int numHiddenNodes = 150;
         // evluation test set
         RegressionEvaluation evalTest = new RegressionEvaluation(numOutputs);
         
-        INDArray featuresTest = testData.getFeatureMatrix();
+        INDArray featuresTest = testData.getFeatures();
     //    log.info("featuresTest" + featuresTest.shapeInfoToString());
     //    log.info("\n" + featuresTest.toString());
 

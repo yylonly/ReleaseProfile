@@ -16,9 +16,9 @@ public class FinalTestResult {
 //		Prediction.prediction("SD-new", "sd/testSet.csv", 136, "src/main/resources/bestModel.bin", false); 
 //		
 		System.out.println("==================== lastested ===================");
-		Prediction.prediction("SD-new", "sd/trainSet.csv", 541, "src/main/resources/sd/latestModel.bin", false); 
-		Prediction.prediction("SD-new", "sd/devSet.csv", 136, "src/main/resources/sd/latestModel.bin", false); 
-		Prediction.prediction("SD-new", "sd/testSet.csv", 136, "src/main/resources/sd/latestModel.bin", false); 
+		Prediction.prediction("SD-new", "sd/trainSet.csv", 541, "src/main/resources/latestModel.bin", false); 
+		Prediction.prediction("SD-new", "sd/devSet.csv", 136, "src/main/resources/latestModel.bin", false); 
+		Prediction.prediction("SD-new", "sd/testSet.csv", 136, "src/main/resources/latestModel.bin", false); 
 	
 		
 //		Prediction.prediction("SRMT-craft", "final-craft/trainset.csv", 200, "src/main/resources/final-craft/latestModel.bin", false); 

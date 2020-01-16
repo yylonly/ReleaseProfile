@@ -62,7 +62,7 @@ public class Prediction {
 
 	        DataSet alldata = iteratortest.next();
 	              
-	        INDArray featuresTest = alldata.getFeatureMatrix();
+	        INDArray featuresTest = alldata.getFeatures();
 	        INDArray lablesTest = alldata.getLabels();
 	       
 	        MultiLayerNetwork bestModel = null;

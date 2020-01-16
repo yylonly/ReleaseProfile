@@ -17,7 +17,7 @@ public class Evaluation {
 		
 		
 		
-        int size = lablesTest.size(0);
+        long size = lablesTest.size(0);
               
         INDArray allf2 = Nd4j.zeros(size);
         double correctnum = 0;
@@ -54,7 +54,7 @@ public class Evaluation {
 		
 		
         INDArray absErrorMatrix = Transforms.abs(lablesTest.sub(PredictionTest)).sum(1).div(PredictionTest.size(1));
-        int size = absErrorMatrix.size(0);
+        long size = absErrorMatrix.size(0);
 		INDArray allAE = Nd4j.zeros(size);
 
         double correct = 0;
@@ -76,7 +76,7 @@ public class Evaluation {
    
 
         evalTest.eval(lablesTest, PredictionTest);	  
-        int columns = lablesTest.size(1);
+        long columns = lablesTest.size(1);
         
         double AverTestR = 0;
         double AverMAE = 0;
