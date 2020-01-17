@@ -66,6 +66,7 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.ui.VertxUIServer;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.storage.FileStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
@@ -101,16 +102,16 @@ public class TrainningDisintegrationTimeWithSearch {
     
     
     //Number of epochs (full passes of the data)
-    public static final int nEpochs = 10000;
+    public static final int nEpochs = 100000;
 
     //Batch size: i.e., each epoch has nSamples/batchSize parameter updates
     public static final int trainsetSize = 541;
     public static final int testsetsize = 136;
     public static final int batchSize = 64;
     
-    public static final int candidateNum = 2;
+    public static final int candidateNum = 20;
     
-    public static final int discretizationCount = 5;
+    public static final int discretizationCount = 50;
     
     //with api properties
     public static final int numInputs = 33; //from 0
@@ -126,7 +127,7 @@ public class TrainningDisintegrationTimeWithSearch {
         ParameterSpace<Double> learningRateHyperparam = new ContinuousParameterSpace(0.01, 0.1);  //Values will be generated uniformly at random between 0.0001 and 0.1 (inclusive)
         ParameterSpace<Double> dropRateHyperparam = new ContinuousParameterSpace(0.9, 1);  //Values will be generated uniformly at random between 0.0001 and 0.1 (inclusive)
         ParameterSpace<Integer> numHiddenNodesHyperparam = new IntegerParameterSpace(150, 300);            //Integer values will be generated uniformly at random between 16 and 256 (inclusive)
-        DiscreteParameterSpace<Activation> activationSpace = new DiscreteParameterSpace(new Activation[]{Activation.TANH, Activation.SIGMOID});
+        DiscreteParameterSpace<Activation> activationSpace = new DiscreteParameterSpace(new Activation[]{Activation.TANH});
         DiscreteParameterSpace<WeightInit> weightInitSpace = new DiscreteParameterSpace(new WeightInit[]{WeightInit.RELU, WeightInit.UNIFORM, WeightInit.XAVIER, WeightInit.NORMAL});
 
         
@@ -136,7 +137,7 @@ public class TrainningDisintegrationTimeWithSearch {
 //                .l2(new ContinuousParameterSpace(0.2, 0.5))
                 //Learning rate hyperparameter: search over different values, applied to all models
                 .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
-                .updater(new AdamSpace(learningRateHyperparam))
+                .updater(new SgdSpace(learningRateHyperparam))
                 .addLayer(new DenseLayerSpace.Builder()
                     //Fixed values for this layer:
                     .nIn(numInputs)  //Fixed input: 28x28=784 pixels for MNIST
@@ -181,7 +182,7 @@ public class TrainningDisintegrationTimeWithSearch {
                 .build();
 
 //        CandidateGenerator candidateGenerator = new RandomSearchGenerator(hyperparameterSpace, null);    //Alternatively: new GridSearchCandidateGenerator<>(hyperparameterSpace, 5, GridSearchCandidateGenerator.Mode.RandomOrder);
-        CandidateGenerator candidateGenerator = new GridSearchCandidateGenerator(hyperparameterSpace, discretizationCount, GridSearchCandidateGenerator.Mode.Sequential, null);
+        CandidateGenerator candidateGenerator = new GridSearchCandidateGenerator(hyperparameterSpace, discretizationCount, GridSearchCandidateGenerator.Mode.RandomOrder, null);
         
         Class<? extends DataSource> dataSourceClass = PharmDataSource.class;
         Properties dataSourceProperties = new Properties();
@@ -217,11 +218,16 @@ public class TrainningDisintegrationTimeWithSearch {
         
         //Start the UI. Arbiter uses the same storage and persistence approach as DL4J's UI
         //Access at http://localhost:9000/arbiter
-//        StatsStorage ss = new FileStatsStorage(new File(System.getProperty("java.io.tmpdir"), "arbiterExampleUiStats.dl4j"));
-//        runner.addListeners(new ArbiterStatusListener(ss));
-//        UIServer.getInstance().attach(ss);
+        StatsStorage ss = new FileStatsStorage(new File("src/main/resources/dl4j.db"));
+        runner.addListeners(new ArbiterStatusListener(ss));
         
+        UIServer uiServer = VertxUIServer.getInstance(8888, true, null);
+       
         
+        uiServer.attach(ss);
+        
+        if (uiServer == null)
+        	System.out.println("null");
         
         
         //Start the hyperparameter optimization

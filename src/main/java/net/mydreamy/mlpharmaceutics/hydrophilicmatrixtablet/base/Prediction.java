@@ -74,6 +74,9 @@ public class Prediction {
 	       		e.printStackTrace();
 	       	}
 	          
+	        
+	   
+	        
 	        INDArray PredictionTest = bestModel.output(featuresTest);
 	        
 	        

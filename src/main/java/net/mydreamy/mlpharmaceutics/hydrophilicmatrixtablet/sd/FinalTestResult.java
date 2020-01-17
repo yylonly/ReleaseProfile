@@ -1,5 +1,10 @@
 package net.mydreamy.mlpharmaceutics.hydrophilicmatrixtablet.sd;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.util.ModelSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +29,21 @@ public class FinalTestResult {
 //		Prediction.prediction("SRMT-craft", "final-craft/trainset.csv", 200, "src/main/resources/final-craft/latestModel.bin", false); 
 //		Prediction.prediction("SRMT-craft", "final-craft/devset.csv", 20, "src/main/resources/final-craft/latestModel.bin", false); 
 //		Prediction.prediction("SRMT-craft", "final-craft/testset.csv", 20, "src/main/resources/final-craft/latestModel.bin", false); 
+		
+		MultiLayerNetwork bestModel = null;
+		
+		 try {
+	        	bestModel = ModelSerializer.restoreMultiLayerNetwork(new File("src/main/resources/latestModel.bin"));
+//	        	bestModel = ModelSerializer.restoreMultiLayerNetwork(new File("src/main/resources/models/8/model.bin"));
+
+	        } 
+	        catch (IOException e) {
+	       		e.printStackTrace();
+	       	}
+	          
+	        
+	        System.out.println(bestModel.summary());
+	        System.out.println(bestModel.getLayerWiseConfigurations().toYaml());
 		
 	}
 }
