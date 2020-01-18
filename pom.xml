@@ -67,23 +67,25 @@
 			    <classifier>macosx-x86_64-avx2</classifier>
 			</dependency>
             
-            <dependency>
+           
             
-     <dependency>
-        <groupId>org.deeplearning4j</groupId>
-        <artifactId>deeplearning4j-ui</artifactId>
-        <version>${nd4j.version}</version>
-    </dependency>
-            
-    <groupId>org.deeplearning4j</groupId>
-    <artifactId>arbiter-deeplearning4j</artifactId>
-    <version>${arbiter.version}</version>
-</dependency>
-<dependency>
-    <groupId>org.deeplearning4j</groupId>
-    <artifactId>arbiter-ui</artifactId>
-    <version>${arbiter.version}</version>
-</dependency>
+	     <dependency>
+	        <groupId>org.deeplearning4j</groupId>
+	        <artifactId>deeplearning4j-ui</artifactId>
+	        <version>${nd4j.version}</version>
+	    </dependency>
+        
+         <dependency>    
+		    <groupId>org.deeplearning4j</groupId>
+		    <artifactId>arbiter-deeplearning4j</artifactId>
+		    <version>${arbiter.version}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.deeplearning4j</groupId>
+		    <artifactId>arbiter-ui</artifactId>
+		    <version>${arbiter.version}</version>
+		</dependency>
         
 	<!--	<dependency>
 		    <groupId>org.nd4j</groupId>

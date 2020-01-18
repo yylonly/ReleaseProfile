@@ -218,7 +218,10 @@ public class TrainningDisintegrationTimeWithSearch {
         
         //Start the UI. Arbiter uses the same storage and persistence approach as DL4J's UI
         //Access at http://localhost:9000/arbiter
-        StatsStorage ss = new FileStatsStorage(new File("src/main/resources/dl4j.db"));
+        File modelHistory = new File("src/main/resources/dl4j.db");
+        if (modelHistory.exists()) //noinspection ResultOfMethodCallIgnored
+        	modelHistory.delete();
+        StatsStorage ss = new FileStatsStorage(modelHistory);
         runner.addListeners(new ArbiterStatusListener(ss));
         
         UIServer uiServer = VertxUIServer.getInstance(8888, true, null);
