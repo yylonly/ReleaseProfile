@@ -15,6 +15,7 @@ import org.datavec.api.split.FileSplit;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.arbiter.MultiLayerSpace;
 import org.deeplearning4j.arbiter.conf.updater.AdamSpace;
+import org.deeplearning4j.arbiter.conf.updater.NesterovsSpace;
 import org.deeplearning4j.arbiter.conf.updater.SgdSpace;
 import org.deeplearning4j.arbiter.layers.DenseLayerSpace;
 import org.deeplearning4j.arbiter.layers.OutputLayerSpace;
@@ -137,7 +138,7 @@ public class TrainningDisintegrationTimeWithSearch {
 //                .l2(new ContinuousParameterSpace(0.2, 0.5))
                 //Learning rate hyperparameter: search over different values, applied to all models
                 .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
-                .updater(new SgdSpace(learningRateHyperparam))
+                .updater(new NesterovsSpace(learningRateHyperparam))
                 .addLayer(new DenseLayerSpace.Builder()
                     //Fixed values for this layer:
                     .nIn(numInputs)  //Fixed input: 28x28=784 pixels for MNIST
@@ -236,7 +237,8 @@ public class TrainningDisintegrationTimeWithSearch {
         //Start the hyperparameter optimization
         runner.execute();
         
-       
+        
+        runner.shutdown(false);
         
         //Print out some basic stats regarding the optimization procedure
         String s = "Best score: " + runner.bestScore() + "\n" +
